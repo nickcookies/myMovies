@@ -1,23 +1,42 @@
 import { useEffect, useState } from "react";
+import api from "../api/api"; // Ensure this is the correct path
+import { AxiosError, AxiosRequestConfig } from "axios";
 
-const useApi = (url: string) => {
+interface TypeOfParams {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+}
+
+export function useApi<T>(
+  url: string,
+  params?: TypeOfParams,
+
+  headers?: AxiosRequestConfig["headers"],
+  enabler: boolean = true
+) {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [data, setData] = useState(null);
+  const [error, setError] = useState<AxiosError | null>(null);
+  const [data, setData] = useState<T[] | null>(null);
 
   useEffect(() => {
+    if (!enabler || !url) return;
+
     setLoading(true);
-    fetch(url)
+
+    const config: AxiosRequestConfig = {
+      params,
+      headers,
+    };
+
+    api
+      .get(url, config)
       .then((response) => {
-        return response.json();
-      })
-      .then((json) => {
-        //console.log(json);
-        setData(json);
+        Array.isArray(response.data)
+          ? setData(response.data)
+          : setData([response.data]);
       })
       .catch((e) => {
         setError(e);
-        //console.log(e);
       })
       .finally(() => {
         setLoading(false);
@@ -26,5 +45,4 @@ const useApi = (url: string) => {
   }, []);
 
   return { loading, data, error };
-};
-export default useApi;
+}

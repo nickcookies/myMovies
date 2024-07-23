@@ -11,4 +11,11 @@ export type MoviesType = {
   year: number;
   imdbid: string;
   imdb_link: string;
+  director?: string[];
+  writers: string[];
+};
+
+export type TypeOfParams = {
+  key: string;
+  host: string;
 };
